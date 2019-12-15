@@ -1,12 +1,9 @@
 use super::json::Config;
 use super::loader::*;
-use super::lot;
 use super::time;
 
 use rustydav::client;
 use rustydav::prelude::*;
-
-use std::io::Read;
 
 pub struct Sandbox {
     webdav: client::Client,
