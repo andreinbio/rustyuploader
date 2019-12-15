@@ -1,0 +1,15 @@
+[package]
+name = "rustyuploader"
+version = "0.1.0"
+authors = ["Andrei Nagacevschi <andrein_bio@yahoo.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+notify = "4.0.13"
+zip = "0.5"
+walkdir = "2"
+rustydav = { path = "../rustydav", version = "0.1.0"}
