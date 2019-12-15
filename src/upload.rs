@@ -1,10 +1,7 @@
-use std::thread;
-use std::sync::{mpsc, Mutex, Arc};
+use std::sync::{Mutex, Arc};
 
 use super::json;
 use super::loader;
-use super::watch;
-use super::lot;
 use super::sandbox;
 use super::archive::*;
 
@@ -29,58 +26,6 @@ impl Uploader {
             ignore_list: config.get_ignore_list(),
             arc_sandbox: Arc::new(Mutex::new(sandbox::Sandbox::init(&config))),
         }
-    }
-
-    pub fn watch(&self) -> () {
-        let arc_sandbox = Arc::clone(&self.arc_sandbox);
-        let cartridges_path = self.config.get_cartridges_path();
-        let cartridges = self.cartridges.clone();
-        let ignore_list = self.ignore_list.clone();
-
-        // thread::spawn(move || {
-            // watcher
-            let watcher = watch::Sentry::spy(cartridges_path.as_str());
-            let watcher_rx = watcher.get_channel();
-
-            // collection
-            let mut collection = lot::Collection::init(cartridges_path.as_str(), cartridges, ignore_list);
-            let mut block_thread: bool = true;
-            let mut n = 0;
-
-            loop {
-                if block_thread {
-                    match watcher_rx.recv() {
-                        Ok(event) => {
-                            block_thread = false;
-                            // collection.parse_event(event);
-                            //dbg!(event);
-                            n += 1;
-                            println!("{}", n);
-                        },
-                        Err(e) => println!("Error listening for events: {}", e),
-                    }
-                } else {
-                    match watcher_rx.try_recv() {
-                        Ok(event) => {
-                            // collection.parse_event(event);
-                            //dbg!(event);
-                            n += 1;
-                            println!("{}", n);
-                        },
-                        Err(e) => match e {
-                            mpsc::TryRecvError::Empty => {
-                                block_thread = true;
-                                // arc_sandbox.lock().unwrap().push_collection(collection.get_data());
-                                //println!("push");
-                                n = 0;
-                            },
-                            mpsc::TryRecvError::Disconnected => println!("Error listening for events: {}", e),
-                        }
-                    }
-                }
-                //println!("new loop");
-            }
-        // });
     }
 
     // returns active code version from the Sandbox
