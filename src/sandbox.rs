@@ -1,6 +1,4 @@
 use super::json::Config;
-use super::loader::*;
-use super::time;
 
 use rustydav::client;
 use rustydav::prelude::*;
@@ -99,53 +97,6 @@ impl Sandbox {
         match self.webdav.mv(self.path_with_version(from).as_str(), self.path_with_version(to).as_str()) {
             Ok(mut result) => self.parse_response_status(&mut result, "rename collection"),
             Err(e) => Err(format!("Error renaming collection: {}!\nFrom: {}\nTo: {}", e, from, to)),
-        }
-    }
-
-    pub fn push_collection(&self, mut data: lot::Data) -> () {
-        if data.rename.is_some() {
-            let time = time::Time::new();
-            for rename in data.rename.take().unwrap().iter() {
-                let result = self.rename(rename.current.as_str(), rename.new.as_str());
-
-                match result {
-                    Ok(()) => println!("[R {}] from: {} to: {}", time.current().get_time(), rename.current, rename.new),
-                    Err(message) => println!("[R {}] {}", time.current().get_time(), message),
-                }
-            }
-        }
-
-        if data.upload.is_some() {
-            let time = time::Time::new();
-            for file in data.upload.take().unwrap().iter() {
-                let file_result = open_file(file.full_path.as_str());
-
-                if file_result.is_err() {
-                    println!("Unable to open file at path: {:?}", file.full_path.as_str());
-                    continue;
-                }
-
-                let file_data = file_result.unwrap();
-                let result = self.send_collection(file_data, file.rel_path.as_str());
-                let current = time.current();
-
-                match result {
-                    Ok(()) => println!("[U {}] {}", current.get_time(), file.rel_path),
-                    Err(message) => println!("{}", message),
-                }
-            }
-        }
-
-        if data.remove.is_some() {
-            let time = time::Time::new();
-            for path in data.remove.take().unwrap().iter() {
-                let result = self.delete_remote_collection(path);
-                let current = time.current();
-                match result {
-                    Ok(()) => println!("[D {}] {}", current.get_time(), path),
-                    Err(message) => println!("{} at path: {}", message, path),
-                }
-            }
         }
     }
 }
