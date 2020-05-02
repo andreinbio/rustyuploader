@@ -1,30 +1,50 @@
 use std::sync::{Mutex, Arc};
 
-use super::json;
-use super::loader;
-use super::sandbox;
-use super::archive::*;
+use crate::{config, config::ConfigData};
+use crate::loader;
+use crate::sandbox;
+use crate::archive::*;
 
 pub struct Uploader {
-    config: json::Config,
+    config: Box<dyn ConfigData>,
     cartridges: Vec<String>,
     ignore_list: Vec<String>,
     arc_sandbox: Arc<Mutex<sandbox::Sandbox>>,
 }
 
 impl Uploader {
-    pub fn new(config_path: &str) -> Self {
-        let config = json::parse_config(&loader::read_file(config_path));
+    pub fn new_from_json(config_path: &str) -> Self {
+        let config: Box<dyn ConfigData> = config::parse_json(&loader::read_file(config_path));
         let cartridges = if config.get_cartridges().is_empty() {
             loader::get_watched_cartridges(config.get_cartridges_path().as_str())
         } else {
             config.get_cartridges()
         };
+        let ignor_list: Vec<String> = config.get_ignore_list();
+        let sandbox: sandbox::Sandbox = sandbox::Sandbox::init(&config);
+
         Uploader {
-            config: config.clone(),
+            config: config,
             cartridges: cartridges,
-            ignore_list: config.get_ignore_list(),
-            arc_sandbox: Arc::new(Mutex::new(sandbox::Sandbox::init(&config))),
+            ignore_list: ignor_list,
+            arc_sandbox: Arc::new(Mutex::new(sandbox)),
+        }
+    }
+
+    pub fn new_from_config(config: Box<dyn ConfigData>) -> Self {
+        let cartridges = if config.get_cartridges().is_empty() {
+            loader::get_watched_cartridges(config.get_cartridges_path().as_str())
+        } else {
+            config.get_cartridges()
+        };
+        let ignor_list: Vec<String> = config.get_ignore_list();
+        let sandbox: sandbox::Sandbox = sandbox::Sandbox::init(&config);
+
+        Uploader {
+            config: config,
+            cartridges: cartridges,
+            ignore_list: ignor_list,
+            arc_sandbox: Arc::new(Mutex::new(sandbox)),
         }
     }
 

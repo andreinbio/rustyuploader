@@ -1,7 +1,7 @@
 extern crate rustydav;
 
 mod loader;
-mod json;
+mod config;
 mod sandbox;
 mod time;
 mod archive;

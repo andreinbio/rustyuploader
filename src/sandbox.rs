@@ -1,4 +1,4 @@
-use super::json::Config;
+use crate::config::{ConfigData};
 
 use rustydav::client;
 use rustydav::prelude::*;
@@ -10,7 +10,7 @@ pub struct Sandbox {
 }
 
 impl Sandbox {
-    pub fn init(config: &Config) -> Self {
+    pub fn init(config: &Box<dyn ConfigData>) -> Self {
         Sandbox {
             webdav: client::Client::init(config.get_username().as_str(), config.get_password().as_str()),
             url: format!("https://{}/on/demandware.servlet/webdav/Sites/Cartridges", config.get_hostname()),
