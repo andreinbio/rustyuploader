@@ -1,0 +1,11 @@
+{
+    "hostname": "https://www.webdavserver.com/User287e257",
+    "username": "",
+    "password": "",
+    "cartridges_path": "tests/cartridges",
+    "cartridge": [
+        "app_biotherm_live",
+        "app_canada_core"
+    ],
+    "code_version": "Products"
+}

@@ -2,19 +2,19 @@ extern crate serde;
 use serde::Deserialize;
 
 pub trait ConfigData: ConfigDataClone {
-    fn get_cartridges_path(&self) -> String;
+    fn get_cartridges_path(&self) -> &str;
 
-    fn get_hostname(&self) -> String;
+    fn get_hostname(&self) -> &str;
 
-    fn get_username(&self) -> String;
+    fn get_username(&self) -> &str;
 
-    fn get_password(&self) -> String;
+    fn get_password(&self) -> &str;
 
-    fn get_code_version(&self) -> String;
+    fn get_code_version(&self) -> &str;
 
-    fn get_cartridges(&self) -> Vec<String>;
+    fn get_cartridges(&self) -> &[String];
 
-    fn get_ignore_list(&self) -> Vec<String>;
+    fn get_ignore_list(&self) -> &[String];
 }
 
 pub trait ConfigDataClone {
@@ -46,40 +46,40 @@ pub struct Config {
 }
 
 impl ConfigData for Config {
-    fn get_cartridges_path(&self) -> String {
-        self.cartridges_path.to_owned()
+    fn get_cartridges_path(&self) -> &str {
+        self.cartridges_path.as_str()
     }
 
-    fn get_hostname(&self) -> String {
-        self.hostname.to_owned()
+    fn get_hostname(&self) -> &str {
+        self.hostname.as_str()
     }
 
-    fn get_username(&self) -> String {
-        self.username.to_owned()
+    fn get_username(&self) -> &str {
+        self.username.as_str()
     }
 
-    fn get_password(&self) -> String {
-        self.password.to_owned()
+    fn get_password(&self) -> &str {
+        self.password.as_str()
     }
 
-    fn get_code_version(&self) -> String {
-        self.code_version.to_owned()
+    fn get_code_version(&self) -> &str {
+        self.code_version.as_str()
     }
 
-    fn get_cartridges(&self) -> Vec<String> {
+    fn get_cartridges(&self) -> &[String] {
         if self.cartridges.is_some() {
-            return self.cartridges.clone().take().unwrap();
+            return &self.cartridges.as_ref().unwrap()[..];
         }
 
-        vec![]
+        &[]
     }
 
-    fn get_ignore_list(&self) -> Vec<String> {
+    fn get_ignore_list(&self) -> &[String] {
         if self.ignore_list.is_some() {
-            return self.ignore_list.clone().take().unwrap();
+            return &self.ignore_list.as_ref().unwrap()[..];
         }
 
-        vec![]
+        &[]
     }
 }
 

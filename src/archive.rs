@@ -1,7 +1,7 @@
 extern crate zip;
 extern crate walkdir;
 
-use zip::{ZipWriter, write::FileOptions, CompressionMethod, result::ZipResult};
+use zip::{ZipWriter, write::FileOptions, CompressionMethod, result::ZipResult, result::ZipError};
 use walkdir::{WalkDir, DirEntry};
 
 use std::io::{Write, Seek};
@@ -9,7 +9,7 @@ use std::path::Path;
 
 use super::loader;
 
-pub fn zip_dir(path: &str, name: &str, ignore_list: &Vec<String>) -> Vec<u8> {
+pub fn zip_dir(path: &str, name: &str, ignore_list: &Vec<String>) -> Result<Vec<u8>, String> {
     let walkdir = WalkDir::new(path.to_string());
     let mut it = walkdir.into_iter().filter_map(|e| e.ok());
 
@@ -25,7 +25,16 @@ pub fn zip_dir(path: &str, name: &str, ignore_list: &Vec<String>) -> Vec<u8> {
 
     let zip_result = zip_dir_iterator(&mut it, zip, options, path_with_root_dir.as_str(), ignore_list);
 
-    zip_result.unwrap().into_inner()
+    if zip_result.is_err() {
+        return match zip_result.err().unwrap() {
+            ZipError::Io(error) => Err(format!("I/O Error: {0}", error)),
+            ZipError::InvalidArchive(error) => Err(format!("Archive is invalid: {0}.", error)),
+            ZipError::UnsupportedArchive(error) => Err(format!("Unsupported archive: {0}.", error)),
+            ZipError::FileNotFound => Err("File not found.".to_owned()),
+        };
+    }
+
+    Ok(zip_result.unwrap().into_inner())
 }
 
 fn zip_dir_iterator<W: Write + Seek>(it: &mut dyn Iterator<Item=DirEntry>, mut zip: ZipWriter<W>, options: FileOptions, prefix: &str, ignore_list: &Vec<String>) -> ZipResult<W> {

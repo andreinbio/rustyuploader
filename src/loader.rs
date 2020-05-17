@@ -42,14 +42,8 @@ pub fn read_file_bytes<P: AsRef<Path> + Debug + Copy>(path: P) -> Vec<u8> {
 }
 
 pub fn get_watched_cartridges(path: &str) -> Vec<String> {
-    let mut cartridges = vec![];
-    for entry in read_dir(path).unwrap() {
-        let file_name = entry.unwrap().file_name().into_string();
-
-        if file_name.is_ok() {
-            cartridges.push(file_name.unwrap());
-        }
-    }
-
-    cartridges
+    read_dir(path).unwrap()
+        .into_iter()
+        .filter_map(|entry| entry.unwrap().file_name().into_string().ok())
+        .collect::<Vec<String>>()
 }
